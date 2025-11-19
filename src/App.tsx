@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Upload, FileText, ChevronLeft, Download } from 'lucide-react';
+import { api } from './services/api';
 import './App.css';
 
 interface Document {
@@ -36,55 +37,46 @@ function App() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [currentDocId, setCurrentDocId] = useState<number | null>(null);
 
-  const generateBookmarks = (): Bookmark[] => {
-    const count = Math.floor(Math.random() * 8) + 3;
-    const bookmarks: Bookmark[] = [];
-    const usedTemplates = new Set<string>();
 
-    for (let i = 0; i < count; i++) {
-      let template;
-      do {
-        template = bookmarkTemplates[Math.floor(Math.random() * bookmarkTemplates.length)];
-      } while (usedTemplates.has(template.label) && usedTemplates.size < bookmarkTemplates.length);
+const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-      usedTemplates.add(template.label);
-      bookmarks.push({
-        page: Math.floor(Math.random() * 100) + 1,
-        label: template.label,
-        category: template.category
-      });
-    }
-
-    return bookmarks.sort((a, b) => a.page - b.page);
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const newDoc: Document = {
-      id: Date.now(),
-      filename: file.name,
-      date: new Date().toLocaleDateString(),
-      status: 'processing',
+  try {
+    // Upload the file to backend
+    const newDoc = await api.uploadFile(file);
+    
+    // Add to documents list with processing status
+    const docWithBookmarks: Document = {
+      ...newDoc,
       bookmarks: []
     };
-
-    setDocuments(prev => [...prev, newDoc]);
+    
+    setDocuments(prev => [...prev, docWithBookmarks]);
     setCurrentView('documents');
 
-    setTimeout(() => {
-      setDocuments(prev =>
-        prev.map(doc =>
-          doc.id === newDoc.id
-            ? { ...doc, status: 'completed', bookmarks: generateBookmarks() }
-            : doc
-        )
-      );
+    // Wait 3 seconds, then process the document
+    setTimeout(async () => {
+      try {
+        const result = await api.processDocument(newDoc.id);
+        setDocuments(prev =>
+          prev.map(doc =>
+            doc.id === newDoc.id
+              ? { ...doc, status: 'completed', bookmarks: result.bookmarks }
+              : doc
+          )
+        );
+      } catch (error) {
+        console.error('Processing failed:', error);
+      }
     }, 3000);
 
     event.target.value = '';
-  };
+  } catch (error) {
+    console.error('Upload failed:', error);
+    alert('Failed to upload file. Please try again.');
+  }
+};
 
   const viewDetails = (docId: number) => {
     setCurrentDocId(docId);
