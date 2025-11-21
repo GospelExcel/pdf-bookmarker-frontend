@@ -17,21 +17,6 @@ interface Bookmark {
   category: 'medical_radiology' | 'photos' | 'estimate' | 'other';
 }
 
-const bookmarkTemplates = [
-  { label: "Medical Records – Radiology", category: "medical_radiology" as const },
-  { label: "CT Scan Results", category: "medical_radiology" as const },
-  { label: "MRI Report", category: "medical_radiology" as const },
-  { label: "X-Ray Images", category: "medical_radiology" as const },
-  { label: "Accident Photos", category: "photos" as const },
-  { label: "Vehicle Damage Photos", category: "photos" as const },
-  { label: "Scene Photos", category: "photos" as const },
-  { label: "Repair Estimate", category: "estimate" as const },
-  { label: "Initial Estimate", category: "estimate" as const },
-  { label: "Supplemental Estimate", category: "estimate" as const },
-  { label: "Police Report", category: "other" as const },
-  { label: "Witness Statements", category: "other" as const }
-];
-
 function App() {
   const [currentView, setCurrentView] = useState<'documents' | 'upload' | 'detail'>('documents');
   const [documents, setDocuments] = useState<Document[]>([]);
