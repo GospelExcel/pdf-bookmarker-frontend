@@ -115,7 +115,7 @@ const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
   return (
     <div className="app">
       <header className="header">
-        <h1>ECT Bookmark Assist</h1>
+        <h1>BookSmart AI</h1>
       </header>
 
       <nav className="nav">
