@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, FileText, ChevronLeft, Download } from 'lucide-react';
 import { api } from './services/api';
 import './App.css';
@@ -36,6 +36,19 @@ function App() {
   const [currentView, setCurrentView] = useState<'documents' | 'upload' | 'detail'>('documents');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [currentDocId, setCurrentDocId] = useState<number | null>(null);
+
+  useEffect(() => {
+  const loadDocuments = async () => {
+    try {
+      const docs = await api.getAllDocuments();
+      setDocuments(docs);
+    } catch (error) {
+      console.error('Failed to load documents:', error);
+    }
+  };
+  loadDocuments();
+}, []);
+  
 
 
 const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -223,10 +236,23 @@ const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
                   <div>{currentDoc.bookmarks.length}</div>
                 </div>
               </div>
-              <button className="btn btn-primary">
+              <button 
+                className="btn btn-primary"
+                onClick={async () => {
+                    if (currentDoc) {
+                    try {
+                        const url = await api.getDownloadUrl(currentDoc.id);
+                        window.open(url, '_blank');
+                    } catch (error) {
+                        console.error('Download failed:', error);
+                        alert('Failed to download PDF');
+                    }
+                    }
+                }}
+                >
                 <Download size={16} style={{ marginRight: '0.5rem' }} />
                 Download Processed PDF
-              </button>
+                </button>
             </div>
 
             <div className="table-container">

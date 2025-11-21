@@ -37,4 +37,15 @@ export const api = {
     const response = await axios.post(`${API_BASE_URL}/process/${documentId}`);
     return response.data;
   },
+
+    getAllDocuments: async (): Promise<Document[]> => {
+    const response = await axios.get(`${API_BASE_URL}/documents`);
+    return response.data;
+  },
+
+    getDownloadUrl: async (documentId: number): Promise<string> => {
+    const response = await axios.get(`${API_BASE_URL}/download/${documentId}`);
+    return response.data.downloadUrl;
+  },
+
 };
